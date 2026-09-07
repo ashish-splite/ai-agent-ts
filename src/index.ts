@@ -1,3 +1,4 @@
+import { cors } from "@elysiajs/cors";
 import { Elysia } from "elysia";
 import { Container } from "./container.ts";
 import { NotFoundError, ValidationError } from "./domain/errors.ts";
@@ -6,6 +7,7 @@ const container = new Container();
 await container.start();
 
 const app = new Elysia()
+  .use(cors())
   .onError(({ code, error, set }) => {
     if (error instanceof NotFoundError) {
       set.status = 404;
@@ -36,6 +38,7 @@ const app = new Elysia()
     storage: "redis",
   }))
   .use(container.userController.routes())
+  .use(container.chatController.routes())
   .listen(container.config.port);
 
 console.log(`[app] listening on http://localhost:${container.config.port}`);
