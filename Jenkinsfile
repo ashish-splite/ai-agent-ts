@@ -14,6 +14,8 @@ pipeline {
         ARGO_INFRA_BRANCH = 'main'
         ARGO_VALUES_FILE = 'applications/jarvis/chart/values.yaml'   // path inside argo-infra repo
         ARGO_IMAGE_TAG_KEY = '.image.tag'               // yq path to update
+        // brew-launched Jenkins service has a minimal PATH; add where docker/git live locally
+        PATH = "/usr/local/bin:/opt/homebrew/bin:${env.PATH}"
     }
 
     stages {
