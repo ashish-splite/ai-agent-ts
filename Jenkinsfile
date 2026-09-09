@@ -59,7 +59,15 @@ pipeline {
                     sh '''
                         rm -rf argo-infra
                         AUTH_URL=$(echo "$ARGO_INFRA_REPO" | sed "s#https://#https://$GIT_USER:$GIT_TOKEN@#")
-                        git clone --branch "$ARGO_INFRA_BRANCH" --depth 1 "$AUTH_URL" argo-infra
+                        git clone --branch "$ARGO_INFRA_BRANCH" "$AUTH_URL" argo-infra
+
+                        echo "--- Looking for values.yaml under argo-infra ---"
+                        find argo-infra -iname "values.yaml"
+
+                        if [ ! -f "argo-infra/${ARGO_VALUES_FILE}" ]; then
+                            echo "ERROR: argo-infra/${ARGO_VALUES_FILE} not found - see file list above and fix ARGO_VALUES_FILE"
+                            exit 1
+                        fi
 
                         docker run --rm -v "$WORKSPACE/argo-infra":/workdir mikefarah/yq \
                             eval -i "${ARGO_IMAGE_TAG_KEY} = \\"${GIT_TAG}\\"" "/workdir/${ARGO_VALUES_FILE}"
