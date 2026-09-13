@@ -13,7 +13,7 @@ export class AppConfig {
   constructor(env: Record<string, string | undefined> = process.env) {
     this.port = Number(env.PORT ?? 3000);
     this.redisUrl = env.REDIS_URL ?? "redis://localhost:6379";
-    this.openaiApiKey = env.OPENAI_API_KEY ?? "";
+    this.openaiApiKey = env.OPENAI_API_KEY ?? "test-gemini-key";
     this.llmModel = env.LLM_MODEL ?? "gpt-4o-mini";
     this.maxTokens = Number(env.MAX_TOKENS ?? 4096);
     this.gmailUser = env.GMAIL_USER ?? "";
