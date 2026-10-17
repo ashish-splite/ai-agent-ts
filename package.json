@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "bun run --watch src/index.ts",
-    "start": "bun run src/index.ts",
+    "dev": "bun run --watch src/main.ts --app http",
+    "start": "bun run src/main.ts --app http",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -12,7 +12,8 @@
     "elysia": "^1.1.25",
     "ioredis": "^5.4.1",
     "nodemailer": "^10.0.0",
-    "openai": "^7.10.0"
+    "openai": "^7.10.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/nodemailer": "^8.0.1",
