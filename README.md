@@ -1,6 +1,6 @@
 # @ashish3020/ts-init
 
-Your reusable TypeScript application boilerplate, running on Bun with Elysia HTTP, validated YAML configuration, and optional Redis, Postgres, and OpenAI clients. Business-specific users, chat, appointment, and mail implementations are not included.
+Your reusable TypeScript application boilerplate, running on Bun with Elysia HTTP, validated YAML configuration, and Redis, Postgres, and OpenAI clients. Business-specific users, chat, appointment, and mail implementations are not included.
 
 This is a project initializer, not a runtime library: the command copies an editable application into a new directory. The application does not depend on this package or receive its updates automatically.
 
@@ -43,7 +43,9 @@ src/
 config.sample.yaml
 ```
 
-All infrastructure connections are opt-in through `config.yaml`; a fresh project starts without external services or credentials. The CLI creates `config.yaml` from the sample and ignores it in Git and Docker. It never copies the initializer repository's local configuration. OpenAI retains the generic agent and tool registry, without domain tools.
+Each app's container explicitly constructs the infrastructure clients it needs, without enable flags or optional client checks. The current HTTP app requires Redis and Postgres at startup. Configure their URLs and replace the OpenAI API-key placeholder in `config.yaml`. The CLI creates this file from the sample and ignores it in Git and Docker; it never copies the initializer repository's local configuration.
+
+The OpenAI infrastructure wrapper only creates and exposes the SDK client. Model selection, prompts, completions, and tool handling belong in application modules when needed, not in infrastructure configuration.
 
 ## Publish to npm
 

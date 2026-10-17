@@ -1,7 +1,7 @@
 {
   "name": "@ashish3020/ts-init",
   "version": "1.0.0",
-  "description": "A reusable Bun and TypeScript application starter with optional infrastructure clients",
+  "description": "A reusable Bun and TypeScript application starter with infrastructure clients",
   "type": "module",
   "bin": {
     "ts-init": "bin/ts-init.js"

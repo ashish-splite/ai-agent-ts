@@ -17,10 +17,12 @@ export class PostgresConnection implements HealthCheck {
 
   async connect(): Promise<void> {
     await this.check();
+    console.log("[postgres] connected");
   }
 
   async disconnect(): Promise<void> {
     await this.client.end({ timeout: 5 });
+    console.log("[postgres] disconnected");
   }
 
   async check(): Promise<void> {

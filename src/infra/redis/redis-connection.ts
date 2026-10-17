@@ -21,6 +21,7 @@ export class RedisConnection implements HealthCheck {
 
   async disconnect(): Promise<void> {
     await this.client.quit();
+    console.log("[redis] disconnected");
   }
 
   async check(): Promise<void> {
