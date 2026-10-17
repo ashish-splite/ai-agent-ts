@@ -1,22 +1,42 @@
 {
-  "name": "ai-agent-ts",
+  "name": "@ashish3020/ts-init",
   "version": "1.0.0",
+  "description": "A reusable Bun and TypeScript application starter with optional infrastructure clients",
   "type": "module",
+  "bin": {
+    "ts-init": "bin/ts-init.js"
+  },
+  "files": [
+    "bin/",
+    "templates/",
+    "src/",
+    "config.sample.yaml",
+    "tsconfig.json",
+    "Dockerfile"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": ["typescript", "bun", "starter", "boilerplate", "scaffold"],
   "scripts": {
     "dev": "bun run --watch src/main.ts --app http",
     "start": "bun run src/main.ts --app http",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/scaffold.test.js",
+    "prepublishOnly": "bun run typecheck && npm test"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.2",
     "elysia": "^1.1.25",
     "ioredis": "^5.4.1",
-    "nodemailer": "^10.0.0",
     "openai": "^7.10.0",
+    "postgres": "^3.4.7",
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/nodemailer": "^8.0.1",
     "bun-types": "latest",
     "typescript": "^5.6.3"
   }

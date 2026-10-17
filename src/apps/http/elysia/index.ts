@@ -4,11 +4,9 @@ import { middleware } from "./middleware/index.ts";
 
 export function createApp(controllers: Pick<
   HttpContainer,
-  "healthController" | "userController" | "chatController"
+  "healthController"
 >) {
   return new Elysia()
     .use(middleware)
-    .use(controllers.healthController.routes())
-    .use(controllers.userController.routes())
-    .use(controllers.chatController.routes());
+    .use(controllers.healthController.routes());
 }

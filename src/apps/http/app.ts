@@ -9,10 +9,12 @@ export async function startHttpApp(config: AppConfig): Promise<void> {
   const app = createApp(container);
 
   try {
-    await container.redis.connect();
+    await container.redis?.connect();
+    await container.postgres?.connect();
     app.listen(config.server.port);
   } catch (error) {
-    container.redis.client.disconnect();
+    container.redis?.client.disconnect();
+    await container.postgres?.disconnect();
     throw error;
   }
   console.log(`[http] listening on http://localhost:${config.server.port}`);
@@ -30,7 +32,12 @@ export async function startHttpApp(config: AppConfig): Promise<void> {
       try {
         await app.stop(false);
       } finally {
-        await container.redis.disconnect();
+        const results = await Promise.allSettled([
+          container.redis?.disconnect(),
+          container.postgres?.disconnect(),
+        ]);
+        const failure = results.find((result) => result.status === "rejected");
+        if (failure?.status === "rejected") throw failure.reason;
       }
     } catch (error) {
       console.error("[http] shutdown failed", error);

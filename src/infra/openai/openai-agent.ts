@@ -4,16 +4,14 @@ import type {
   ChatCompletionMessageToolCall,
 } from "openai/resources/chat/completions";
 import type { AppConfig } from "../../config/app-config.ts";
-import type { LlmClient, LlmMessage } from "../../modules/chat/llm-client.ts";
-import { SYSTEM_PROMPT } from "../../modules/chat/prompts.ts";
 import type { AgentToolRegistry } from "./tools.ts";
 
 /** Caps the tool-call loop so a looping model cannot hang the request. */
 const MAX_TOOL_ROUNDS = 5;
 const FALLBACK_REPLY = "Sorry, I could not generate a response.";
 
-export class OpenAiAgent implements LlmClient {
-  private readonly client: OpenAI;
+export class OpenAiAgent {
+  readonly client: OpenAI;
 
   constructor(
     private readonly config: AppConfig["openai"],
@@ -22,14 +20,11 @@ export class OpenAiAgent implements LlmClient {
     this.client = new OpenAI({ apiKey: this.config.apiKey });
   }
 
-  async complete(messages: LlmMessage[]): Promise<string> {
+  async complete(messages: ChatCompletionMessageParam[]): Promise<string> {
     const tools = this.tools.definitions();
     const conversation: ChatCompletionMessageParam[] = [
-      { role: "system", content: SYSTEM_PROMPT },
-      ...messages.map((message) => ({
-        role: message.role,
-        content: message.content,
-      })),
+      { role: "system", content: this.config.systemPrompt },
+      ...messages,
     ];
 
     for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
