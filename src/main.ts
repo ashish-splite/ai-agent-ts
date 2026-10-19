@@ -13,13 +13,11 @@ try {
     },
   });
 
-  const config = loadAppConfig(args.config);
-
   // Apps are imported lazily so each process loads only its own dependencies.
   switch (args.app) {
     case "http": {
       const { startHttpApp } = await import("./apps/http/app.ts");
-      await startHttpApp(config);
+      await startHttpApp(loadAppConfig(args.config));
       break;
     }
     case "worker": {
