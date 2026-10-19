@@ -119,6 +119,36 @@ The OpenAI infrastructure wrapper only creates and exposes the SDK client. Model
 
    npm versions are immutable. Use `minor` for added features and `major` for breaking changes. Re-run the tarball inspection and smoke test for every release.
 
+## Docker CI and GitOps
+
+The workflow in `.github/workflows/deploy-jarvis.yaml` runs on pushes to `main`, or manually from the Actions tab with `main` selected. It:
+
+1. Installs dependencies with the frozen lockfile and typechecks the source.
+2. Builds Linux AMD64 and ARM64 images and pushes `thedarkest22/jarvis:<full-source-commit-sha>` to Docker Hub.
+3. Checks out `ashish-splite/argo-infra` and changes only `image.tag` in `applications/jarvis/chart/values.yaml` using a YAML-aware editor.
+4. Commits and pushes that change to the infrastructure repository's default branch. Argo CD can then reconcile that commit according to its sync policy.
+
+In this source repository, open **Settings > Secrets and variables > Actions** and add these repository secrets:
+
+| Secret | Value |
+| --- | --- |
+| `DOCKERHUB_USERNAME` | `thedarkest22`, or another user authorized to push to that Docker Hub repository. |
+| `DOCKERHUB_TOKEN` | A Docker Hub access token with write permission for `thedarkest22/jarvis`. |
+| `ARGO_INFRA_TOKEN` | A fine-grained GitHub personal access token with access to `argo-infra` and **Contents: Read and write**. |
+
+The default workflow `GITHUB_TOKEN` cannot write to a different repository. Ensure the infra token is approved for its organization if required, and that the target branch permits this identity to push. A protected branch requiring pull requests needs a PR-based update flow instead of this direct-push workflow.
+
+Optional repository **variables**, not secrets:
+
+| Variable | Default |
+| --- | --- |
+| `ARGO_INFRA_REPOSITORY` | `<source-repository-owner>/argo-infra`, currently `ashish-splite/argo-infra`. Set `owner/argo-infra` if it lives elsewhere. |
+| `ARGO_INFRA_BRANCH` | The infrastructure repository's default branch. Set a branch name to override it. |
+
+The values file must already contain `image.tag`, and its image repository must be `thedarkest22/jarvis`. The workflow deliberately publishes the source SHA rather than relying on a mutable `latest` tag. Infrastructure updates run only after a successful image push. Releases are serialized to avoid concurrent updates from this source repository; unrelated infra commits are rebased before pushing, and conflicts fail the workflow rather than force-pushing.
+
+Credentials and local `config.yaml` are not baked into the image. Supply runtime configuration through your Kubernetes deployment's existing Secret/volume configuration. Adding the workflow does not deploy anything until it runs with valid credentials.
+
 ## Develop This Starter
 
 ```sh

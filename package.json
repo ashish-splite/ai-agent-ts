@@ -24,6 +24,8 @@
   "scripts": {
     "dev": "bun run --watch src/main.ts --app http",
     "start": "bun run src/main.ts --app http",
+    "dev:worker": "bun run --watch src/main.ts --app worker",
+    "start:worker": "bun run src/main.ts --app worker",
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/scaffold.test.js",
     "prepublishOnly": "bun run typecheck && npm test"
