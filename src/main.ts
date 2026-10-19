@@ -1,7 +1,7 @@
 import { parseArgs } from "node:util";
 import { loadAppConfig } from "./config/app-config.ts";
 
-const USAGE = "Usage: bun run src/main.ts --app <http|worker> [--config <path>] [--data <path>]";
+const USAGE = "Usage: bun run src/main.ts --app <http|worker> [--config <path>] [--data <directory>]";
 
 try {
   const { values: args } = parseArgs({
@@ -9,7 +9,7 @@ try {
     options: {
       app: { type: "string", short: "a" },
       config: { type: "string", short: "c", default: "config.yaml" },
-      data: { type: "string", short: "d", default: "data.txt" },
+      data: { type: "string", short: "d", default: "." },
     },
   });
 

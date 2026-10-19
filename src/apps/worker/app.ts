@@ -1,10 +1,13 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { join } from "node:path";
 
 const INTERVAL_MS = 5_000;
+const DATA_FILE_NAME = "data.txt";
 
-/** Relative paths resolve against the current working directory. */
-export async function startWorkerApp(dataFile: string): Promise<void> {
+/** Relative directories resolve against the current working directory. */
+export async function startWorkerApp(dataDir: string): Promise<void> {
+  mkdirSync(dataDir, { recursive: true });
+  const dataFile = join(dataDir, DATA_FILE_NAME);
   let counter = readOrCreateCounter(dataFile);
   console.log(`[worker] started at counter ${counter}, writing to ${dataFile}`);
 
@@ -30,7 +33,6 @@ export async function startWorkerApp(dataFile: string): Promise<void> {
 
 function readOrCreateCounter(dataFile: string): number {
   if (!existsSync(dataFile)) {
-    mkdirSync(dirname(dataFile), { recursive: true });
     writeFileSync(dataFile, "0\n");
     console.log(`[worker] created ${dataFile}`);
     return 0;
