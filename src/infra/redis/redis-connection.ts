@@ -1,6 +1,9 @@
 import { Redis } from "ioredis";
 import type { AppConfig } from "../../config/app-config.ts";
 import type { HealthCheck } from "../../modules/health/health-check.ts";
+import { createLogger } from "../../shared/logger.ts";
+
+const log = createLogger("redis");
 
 /** Owns the single shared Redis connection for the whole app. */
 export class RedisConnection implements HealthCheck {
@@ -9,19 +12,17 @@ export class RedisConnection implements HealthCheck {
 
   constructor(config: AppConfig["redis"]) {
     this.client = new Redis(config.url, { lazyConnect: true });
-    this.client.on("error", (error) =>
-      console.error("[redis] client error", error),
-    );
+    this.client.on("error", (error) => log.error("client error", error));
   }
 
   async connect(): Promise<void> {
     await this.client.connect();
-    console.log("[redis] connected");
+    log.info("connected");
   }
 
   async disconnect(): Promise<void> {
     await this.client.quit();
-    console.log("[redis] disconnected");
+    log.info("disconnected");
   }
 
   async check(): Promise<void> {

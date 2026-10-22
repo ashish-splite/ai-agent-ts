@@ -13,3 +13,10 @@ postgres:
 
 openai:
   apiKey: replace-with-your-openai-api-key
+
+observability:
+  enabled: false
+  serviceName: ai-agent
+  # OTLP/HTTP collector base URL; /v1/{traces,metrics,logs} is appended.
+  otlpEndpoint: http://localhost:4318
+  metricExportIntervalMs: 10000

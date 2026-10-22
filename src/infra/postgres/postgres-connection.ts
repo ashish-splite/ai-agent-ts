@@ -1,6 +1,9 @@
 import postgres from "postgres";
 import type { AppConfig } from "../../config/app-config.ts";
 import type { HealthCheck } from "../../modules/health/health-check.ts";
+import { createLogger } from "../../shared/logger.ts";
+
+const log = createLogger("postgres");
 
 export class PostgresConnection implements HealthCheck {
   readonly name = "postgres";
@@ -17,12 +20,12 @@ export class PostgresConnection implements HealthCheck {
 
   async connect(): Promise<void> {
     await this.check();
-    console.log("[postgres] connected");
+    log.info("connected");
   }
 
   async disconnect(): Promise<void> {
     await this.client.end({ timeout: 5 });
-    console.log("[postgres] disconnected");
+    log.info("disconnected");
   }
 
   async check(): Promise<void> {

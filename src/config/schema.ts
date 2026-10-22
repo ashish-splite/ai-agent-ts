@@ -19,4 +19,10 @@ export const appConfigSchema = z.strictObject({
   openai: z.strictObject({
     apiKey: nonEmptyString,
   }),
+  observability: z.strictObject({
+    enabled: z.boolean(),
+    serviceName: nonEmptyString,
+    otlpEndpoint: z.url({ protocol: /^https?$/ }),
+    metricExportIntervalMs: z.number().int().positive(),
+  }),
 });

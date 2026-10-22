@@ -1,5 +1,8 @@
 import { Elysia } from "elysia";
 import { NotFoundError, ValidationError } from "../../../../shared/errors.ts";
+import { createLogger } from "../../../../shared/logger.ts";
+
+const log = createLogger("app");
 
 export const errorHandler = new Elysia({ name: "error-handler" }).onError(
   { as: "global" },
@@ -24,7 +27,7 @@ export const errorHandler = new Elysia({ name: "error-handler" }).onError(
       return { error: "Route not found" };
     }
 
-    console.error("[app] unhandled error", error);
+    log.error("unhandled error", error);
     set.status = 500;
     return { error: "Internal server error" };
   },
