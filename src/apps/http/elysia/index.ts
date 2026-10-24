@@ -1,14 +1,14 @@
 import { Elysia } from "elysia";
-import type { HttpContainer } from "../container.ts";
-import { middleware } from "./middleware/index.ts";
-import { httpTelemetry } from "./middleware/telemetry.ts";
+import type { HealthService } from "../../../modules/health/health.service.ts";
+import { HealthController } from "./controllers/health.controller.ts";
+import { createMiddleware } from "./middleware/index.ts";
 
-export function createApp(controllers: Pick<
-  HttpContainer,
-  "healthController"
->) {
+interface HttpDependencies {
+  healthService: HealthService;
+}
+
+export function createApp(dependencies: HttpDependencies, observabilityEnabled = false) {
   return new Elysia()
-    .use(httpTelemetry())
-    .use(middleware)
-    .use(controllers.healthController.routes());
+    .use(createMiddleware(observabilityEnabled))
+    .use(new HealthController(dependencies.healthService).routes());
 }

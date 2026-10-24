@@ -1,16 +1,34 @@
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
+import { SpanKind, SpanStatusCode } from "@opentelemetry/api";
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import { BatchLogRecordProcessor } from "@opentelemetry/sdk-logs";
 import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import { NodeSDK } from "@opentelemetry/sdk-node";
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
+import { BatchSpanProcessor, type ReadableSpan, type SpanProcessor } from "@opentelemetry/sdk-trace-base";
 import type { AppConfig } from "../../config/app-config.ts";
 
 export interface Telemetry {
   /** Flushes pending traces, metrics and logs. */
   shutdown(): Promise<void>;
 }
+
+export const httpSpanProcessor: SpanProcessor = {
+  onStart() {},
+  onEnd(span: ReadableSpan) {
+    if (span.kind === SpanKind.SERVER && Number(span.attributes["http.response.status_code"]) >= 500) {
+      span.status.code = SpanStatusCode.ERROR;
+    }
+    for (const key of Object.keys(span.attributes)) {
+      if (key.includes(".header.") || key.includes(".body") || key.includes(".cookie") ||
+        key === "url.full" || key === "url.query") {
+        delete span.attributes[key];
+      }
+    }
+  },
+  forceFlush: async () => {},
+  shutdown: async () => {},
+};
 
 /** Must run before any meters are created: the metrics API has no proxy provider. */
 export function startTelemetry(config: AppConfig["observability"]): Telemetry {
@@ -20,6 +38,7 @@ export function startTelemetry(config: AppConfig["observability"]): Telemetry {
   const sdk = new NodeSDK({
     serviceName: config.serviceName,
     spanProcessors: [
+      httpSpanProcessor,
       new BatchSpanProcessor(new OTLPTraceExporter({ url: `${endpoint}/v1/traces` })),
     ],
     metricReaders: [

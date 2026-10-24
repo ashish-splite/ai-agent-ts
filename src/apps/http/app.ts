@@ -10,7 +10,10 @@ const log = createLogger("http");
 export async function startHttpApp(config: AppConfig): Promise<void> {
   const telemetry = startTelemetry(config.observability);
   const container = new HttpContainer(config);
-  const app = createApp(container);
+  const app = createApp(
+    { healthService: container.healthService },
+    config.observability.enabled,
+  );
 
   try {
     await container.redis.connect();

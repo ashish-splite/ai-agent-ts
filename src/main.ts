@@ -1,7 +1,7 @@
 import { parseArgs } from "node:util";
 import { loadAppConfig } from "./config/app-config.ts";
 
-const USAGE = "Usage: bun run src/main.ts --app <http|worker> [--config <path>] [--data <directory>]";
+const USAGE = "Usage: bun run src/main.ts --app <http|worker> [--config <path>] [--data <directory>] [--workflow <name>]";
 
 try {
   const { values: args } = parseArgs({
@@ -10,6 +10,7 @@ try {
       app: { type: "string", short: "a" },
       config: { type: "string", short: "c", default: "config.yaml" },
       data: { type: "string", short: "d", default: "." },
+      workflow: { type: "string", short: "w" },
     },
   });
 
@@ -22,7 +23,7 @@ try {
     }
     case "worker": {
       const { startWorkerApp } = await import("./apps/worker/app.ts");
-      await startWorkerApp(args.data);
+      await startWorkerApp(loadAppConfig(args.config), args.workflow);
       break;
     }
     default:

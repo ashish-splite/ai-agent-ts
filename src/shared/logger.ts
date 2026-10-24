@@ -1,14 +1,30 @@
-import { logs, SeverityNumber, type AnyValueMap } from "@opentelemetry/api-logs";
+import { trace } from "@opentelemetry/api";
+import { OpenTelemetryTransportV3 } from "@opentelemetry/winston-transport";
+import winston from "winston";
 
 type Level = "debug" | "info" | "warn" | "error";
 type Fields = Record<string, string | number | boolean>;
 
-const SEVERITY: Record<Level, SeverityNumber> = {
-  debug: SeverityNumber.DEBUG,
-  info: SeverityNumber.INFO,
-  warn: SeverityNumber.WARN,
-  error: SeverityNumber.ERROR,
-};
+const root = winston.createLogger({
+  level: process.env.LOG_LEVEL ?? "info",
+  transports: [
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format((info) => {
+          const current = trace.getActiveSpan()?.spanContext();
+          if (current) {
+            info.trace_id = current.traceId;
+            info.span_id = current.spanId;
+          }
+          return info;
+        })(),
+        winston.format.timestamp(),
+        winston.format.json(),
+      ),
+    }),
+    new OpenTelemetryTransportV3(),
+  ],
+});
 
 export interface Logger {
   debug(message: string, fields?: Fields): void;
@@ -19,16 +35,8 @@ export interface Logger {
 
 /** Writes to the console and to OpenTelemetry, correlated with the active span. */
 export function createLogger(scope: string): Logger {
-  const write = (level: Level, message: string, attributes: AnyValueMap) => {
-    const extra = Object.keys(attributes).length > 0 ? [attributes] : [];
-    console[level](`[${scope}] ${message}`, ...extra);
-    // Resolved per call so loggers created before the SDK starts still export.
-    logs.getLogger(scope).emit({
-      severityNumber: SEVERITY[level],
-      severityText: level.toUpperCase(),
-      body: message,
-      attributes,
-    });
+  const write = (level: Level, message: string, attributes: Record<string, unknown>) => {
+    root.log(level, message, { ...attributes, scope });
   };
 
   return {
@@ -40,7 +48,7 @@ export function createLogger(scope: string): Logger {
   };
 }
 
-function errorAttributes(error: unknown): AnyValueMap {
+function errorAttributes(error: unknown): Record<string, unknown> {
   if (error === undefined) return {};
   if (!(error instanceof Error)) return { "exception.message": String(error) };
   return {
